@@ -1,7 +1,10 @@
 # right now this prints the path and set of actions that the agent chooses for each episode
 # usually, the optimal path is the last one it outputs, but still need to determine the definite optimal path
 # the graphs show convergence because after a ceratin number of episodes, you can see that the number of time steps increases at a steady rate, showing that each episode is likely the same (i.e. convergence)
+
 # still need to be able to find the optimal path
+# could also put SARSA and Q-learning into one method and could run certain lines depending on if a parameter tells us its SARSA or Q-learning
+# could make the allowedActions method look nicer and be more efficient
 
 import numpy as np
 import random
@@ -30,10 +33,7 @@ class World:
         elif(windProbability == 3):
             temp += 2
 
-        # MIGHT NEED TO CHANGE THIS TO SAY THAT IF IT GOES OUTSIDE, PUT IT JUST INSIDE, NOT KEEP IT IN THE SAME
-        # if(temp >= 0 and temp < self.gridHeight): # if new position with the wind is off the grid, don't do it
-        #     newPos[0] = temp
-
+        # if it goes outisde the grid bc of the wind, make the new position be just inside where it would have gone off
         if(temp < 0):
             newPos[0] = 0
         elif(temp >= self.gridHeight):
@@ -96,7 +96,6 @@ class World:
 
 class Agent:
     def __init__(self, world: World):
-        #self.actions = [(1,0),(-1,0),(0,1),(0,-1)] # up, down, right, left
         self.alpha = 0.5 # learning rate
         self.epsilon = 0.01 # the percent you want to explore
         self.gamma = 0.9
@@ -146,7 +145,6 @@ class Agent:
         return action
 
     def SARSA(self):
-        #currPos = self.world.startPos # start a starting position. currPos is (3,0)
         self.world.currentPos = self.world.startPos
         visited = [] # initalize
         actionsTaken = []
