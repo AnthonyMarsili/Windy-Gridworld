@@ -24,7 +24,10 @@ class World:
     def movePosition(self, action): # moves the agent to a new position based on the chosen action, and returns the new position and the reward
         newPos = np.add(list(self.currentPos), list(action))
 
-        windProbability = random.randint(1,3)
+        if(self.king): # if the agent is using King's Moves, the wind is stochastic
+            windProbability = random.randint(1,3)
+        else:
+            windProbability = 1
 
         temp = newPos[0] - self.windVals[list(self.currentPos)[1]]
 
