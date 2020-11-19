@@ -1,4 +1,4 @@
-# Windy-Gridworld
+# WindyGridworld
 
 Running Main.py will solve the Windy Gridworld Problem four consecutive times.
 
