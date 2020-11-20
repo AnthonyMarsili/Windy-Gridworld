@@ -1,10 +1,6 @@
-# right now this prints the path and set of actions that the agent chooses for each episode
-# usually, the optimal path is the last one it outputs, but still need to determine the definite optimal path
-# the graphs show convergence because after a ceratin number of episodes, you can see that the number of time steps increases at a steady rate, showing that each episode is likely the same (i.e. convergence)
-
-# still need to be able to find the optimal path
-# could also put SARSA and Q-learning into one method and could run certain lines depending on if a parameter tells us its SARSA or Q-learning
-# could make the allowedActions method look nicer and be more efficient
+# you can see at the end of each graph that there starts to be a constant increase, showing the start of convergence
+# we could put SARSA and Q-learning into one method and could run certain lines depending on if a parameter tells us its SARSA or Q-learning
+# we could also make the allowedActions method look nicer and be more efficient
 
 import numpy as np
 import random
