@@ -100,7 +100,7 @@ class World:
 class Agent:
     def __init__(self, world: World):
         self.alpha = 0.5 # learning rate
-        self.epsilon = 0.01 # the percent you want to explore
+        self.epsilon = 0.1 # the percent you want to explore
         self.gamma = 0.9
         self.world = world
         self.Q_values = self.createQTable()
@@ -154,6 +154,7 @@ class Agent:
         visited.append(self.world.startPos) # put the first state into it to say we visited it
         chosenAction = self.chooseAction(self.world.currentPos) # choose a random action from (3,0)
         newPosAndReward = None # initialize
+        converged = True
 
         while True: # loop for each step of the episode
             # Take action A, observe R and S'
@@ -165,8 +166,18 @@ class Agent:
             self.numOfSteps += 1
             # Choose A' from S' using epislon-greedy policy
             nextAction = self.chooseAction(newPosition) # choose an action that is possible from the new position based on the epislon greedy method
+
+            oldQ = self.Q_values[self.world.currentPos][chosenAction]
+
+
             # Update the Q-value of the current position
             self.Q_values[self.world.currentPos][chosenAction] += self.alpha * (reward + self.gamma * self.Q_values[newPosition][nextAction] - self.Q_values[self.world.currentPos][chosenAction]) # perform the update
+
+            #print(round(oldQ, 4))
+            #print(round(self.Q_values[self.world.currentPos][chosenAction], 4))
+            if(abs(oldQ - self.Q_values[self.world.currentPos][chosenAction]) > self.epsilon):
+                converged = False
+
             # advance to the next state and action
             self.world.currentPos = newPosition # make current position be the new position, and action be the chosen action that we executed
             chosenAction = nextAction
@@ -174,9 +185,7 @@ class Agent:
             if(self.world.currentPos == self.world.goalPos): # if the next state is the goal, break
                     break
 
-        print(visited)
-        print(actionsTaken)
-        #print(self.Q_values.items())
+        return converged, visited, actionsTaken
 
     def Qlearning(self):
         self.world.currentPos = self.world.startPos
@@ -184,6 +193,7 @@ class Agent:
         actionsTaken = []
         visited.append(self.world.startPos)
         newPosAndReward = None # initialize
+        converged = True
 
         while True: # loop for each step of the episode
             # Choose A from S using the epislon-greedy policy
@@ -197,28 +207,45 @@ class Agent:
             self.numOfSteps += 1
             # find best action from S'
             bestAction = self.getBestAction(newPosition)
+
+            oldQ = self.Q_values[self.world.currentPos][chosenAction]
+
             # update current state q-value
             self.Q_values[self.world.currentPos][chosenAction] += self.alpha * (reward + self.gamma * self.Q_values[newPosition][bestAction] - self.Q_values[self.world.currentPos][chosenAction]) # perform the update
+
+            if(abs(oldQ - self.Q_values[self.world.currentPos][chosenAction]) > self.epsilon):
+                converged = False
+
             # advance to the next state
             self.world.currentPos = newPosition
 
             if(self.world.currentPos == self.world.goalPos): # if the next state is the goal, break
                     break
 
-        print(visited)
-        print(actionsTaken)
-
+        return converged, visited, actionsTaken
 
 def main():
+    # Uncomment the lines of code to find the average number of episodes (over 500 iterations) needed for each scenario
+    # episodeList = []
     # Runs regular SARSA
+    #for i in range(500):
     testWorld = World(False)
     testAgent = Agent(testWorld)
     timeSteps = [0]
     episodes = [0]
-    for x in range(170): # i think this is the number of episodes
-        testAgent.SARSA()
+    for x in range(10000): # i think this is the number of episodes
+        result = testAgent.SARSA()
         timeSteps.append(testAgent.numOfSteps)
         episodes.append(x)
+        if(result[0]):
+            print("Found the optimal policy using SARSA. The path is...")
+            print(result[1])
+            print("The actions taken on that path are...")
+            print(result[2])
+            #episodeList.append(x+1)
+            #print(result[1])
+            break
+    #print(sum(episodeList) / len(episodeList) )
 
     plt.plot(timeSteps, episodes)
     plt.suptitle("SARSA")
@@ -226,15 +253,25 @@ def main():
     plt.ylabel("Episodes")
     plt.show()
 
-    # Runs regular Q-learning
+    #Runs regular Q-learning
+    #for i in range(500):
     testWorld = World(False)
     testAgent = Agent(testWorld)
     timeSteps = [0]
     episodes = [0]
-    for x in range(170): # i think this is the number of episodes
-        testAgent.Qlearning()
+    for x in range(10000): # i think this is the number of episodes
+        result = testAgent.Qlearning()
         timeSteps.append(testAgent.numOfSteps)
         episodes.append(x)
+        if(result[0]):
+            print("Found the optimal policy using Q-learning. The path is...")
+            print(result[1])
+            print("The actions taken on that path are...")
+            print(result[2])
+            # episodeList.append(x+1)
+            # print(result[1])
+            break
+    # print(sum(episodeList) / len(episodeList) )
 
     plt.plot(timeSteps, episodes)
     plt.suptitle("Q-learning")
@@ -243,14 +280,25 @@ def main():
     plt.show()
 
     # Runs SARSA with King's Moves
+    #for i in range(500):
     testWorld = World(True)
     testAgent = Agent(testWorld)
     timeSteps = [0]
     episodes = [0]
     for x in range(170): # i think this is the number of episodes
-        testAgent.SARSA()
+        result = testAgent.SARSA()
         timeSteps.append(testAgent.numOfSteps)
         episodes.append(x)
+        if(result[0]):
+            print("Found the optimal policy using SARSA, King's Moves, and stochastic winds. The path is...")
+            print(result[1])
+            print("The actions taken on that path are...")
+            print(result[2])
+            # episodeList.append(x+1)
+            # print(result[1])
+            break
+
+    # print(sum(episodeList) / len(episodeList) )
 
     plt.plot(timeSteps, episodes)
     plt.suptitle("SARSA - King's Moves")
@@ -259,21 +307,30 @@ def main():
     plt.show()
 
     # Runs Q-learning with King's Moves
+    #for i in range(500):
     testWorld = World(True)
     testAgent = Agent(testWorld)
     timeSteps = [0]
     episodes = [0]
-    for x in range(170): # i think this is the number of episodes
-        testAgent.Qlearning()
+    for x in range(1700): # i think this is the number of episodes
+        result = testAgent.Qlearning()
         timeSteps.append(testAgent.numOfSteps)
         episodes.append(x)
+        if(result[0]):
+            print("Found the optimal policy using Q-learning, King's Moves, and stochastic winds. The path is...")
+            print(result[1])
+            print("The actions taken on that path are...")
+            print(result[2])
+            # episodeList.append(x+1)
+            # print(result[1])
+            break
+    # print(sum(episodeList) / len(episodeList) )
 
     plt.plot(timeSteps, episodes)
     plt.suptitle("Q-learning - King's Moves")
     plt.xlabel("Total Timesteps")
     plt.ylabel("Episodes")
     plt.show()
-
 
 if __name__ == '__main__':
     main()
