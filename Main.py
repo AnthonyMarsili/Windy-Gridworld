@@ -1,5 +1,6 @@
-# you can see at the end of each graph that there starts to be a constant increase, showing the start of convergence
-# we could put SARSA and Q-learning into one method and could run certain lines depending on if a parameter tells us its SARSA or Q-learning
+# Running this program solves the Deterministic Windy Gridworld with SARSA, then with Q-learning.
+# Then it solves the Stochastic Windy Gridworld with King's Moves with SARSA, then with Q-learning.
+# We could put SARSA and Q-learning into one method and could run certain lines depending on if a parameter tells us its SARSA or Q-learning
 # we could also make the allowedActions method look nicer and be more efficient
 
 import numpy as np
@@ -8,7 +9,7 @@ import time
 import matplotlib.pyplot as plt
 
 class World:
-    def __init__(self, kingBool):
+    def __init__(self, kingBool): # if kingBool is True, the agent can use King's moves, else it can only move N, S, E, W
         self.gridWidth = 10
         self.gridHeight = 7
         self.startPos = (3,0)
@@ -55,7 +56,7 @@ class World:
             allowedMoves.append((0,1))
         if(position[1] != 0):
             allowedMoves.append((0,-1))
-        if(self.king): # need to append the proper diagonal actions here. right now, this is a bad way of doing it, but it works
+        if(self.king): # append the correct diagonal actions to the allowedMoves lsit
             allowedMoves.append((1,1))
             allowedMoves.append((-1,1))
             allowedMoves.append((1,-1))
@@ -92,13 +93,12 @@ class World:
 
         return allowedMoves
 
-
 class Agent:
-    def __init__(self, world: World):
-        self.alpha = 0.5 # learning rate
-        self.epsilon = 0.1 # the percent you want to explore
-        self.gamma = 0.9
+    def __init__(self, a, e, world: World):
+        self.alpha = a # learning rate
+        self.epsilon = e # the percent you want to explore
         self.world = world
+        self.gamma = 0.9
         self.Q_values = self.createQTable()
         self.numOfSteps = 0
 
@@ -165,7 +165,6 @@ class Agent:
 
             oldQ = self.Q_values[self.world.currentPos][chosenAction]
 
-
             # Update the Q-value of the current position
             self.Q_values[self.world.currentPos][chosenAction] += self.alpha * (reward + self.gamma * self.Q_values[newPosition][nextAction] - self.Q_values[self.world.currentPos][chosenAction]) # perform the update
 
@@ -221,108 +220,110 @@ class Agent:
         return converged, visited, actionsTaken
 
 def main():
-    # Uncomment the lines of code to find the average number of episodes (over 500 iterations) needed for each scenario
-    # episodeList = []
+    episodeList = []
     # Runs regular SARSA
-    #for i in range(500):
     testWorld = World(False)
-    testAgent = Agent(testWorld)
+    testAgent = Agent(0.9, 0.001, testWorld)
     timeSteps = [0]
     episodes = [0]
-    for x in range(10000): # i think this is the number of episodes
+    convergedX = []
+    convergedY = []
+    alreadyConverged = False
+    for x in range(170): # the max number of episodes
         result = testAgent.SARSA()
         timeSteps.append(testAgent.numOfSteps)
         episodes.append(x)
-        if(result[0]):
+        if(result[0] and not alreadyConverged):
             print("Found the optimal policy using SARSA. The path is...")
             print(result[1])
             print("The actions taken on that path are...")
             print(result[2])
-            #episodeList.append(x+1)
-            #print(result[1])
-            break
-    #print(sum(episodeList) / len(episodeList) )
+            convergedX.append(x)
+            convergedY.append(testAgent.numOfSteps)
+            alreadyConverged = True
 
-    plt.plot(timeSteps, episodes)
+    plt.plot(timeSteps, episodes, 'r--', convergedY, convergedX, 'bs')
     plt.suptitle("SARSA")
     plt.xlabel("Total Timesteps")
     plt.ylabel("Episodes")
     plt.show()
 
     #Runs regular Q-learning
-    #for i in range(500):
     testWorld = World(False)
-    testAgent = Agent(testWorld)
+    testAgent = Agent(0.9, 0.01, testWorld)
     timeSteps = [0]
     episodes = [0]
-    for x in range(10000): # i think this is the number of episodes
+    convergedX = []
+    convergedY = []
+    alreadyConverged = False
+    for x in range(170): # the max number of episodes
         result = testAgent.Qlearning()
         timeSteps.append(testAgent.numOfSteps)
         episodes.append(x)
-        if(result[0]):
+        if(result[0] and not alreadyConverged):
             print("Found the optimal policy using Q-learning. The path is...")
             print(result[1])
             print("The actions taken on that path are...")
             print(result[2])
-            # episodeList.append(x+1)
-            # print(result[1])
-            break
-    # print(sum(episodeList) / len(episodeList) )
+            convergedX.append(x)
+            convergedY.append(testAgent.numOfSteps)
+            alreadyConverged = True
 
-    plt.plot(timeSteps, episodes)
+    plt.plot(timeSteps, episodes, 'r--', convergedY, convergedX, 'bs')
     plt.suptitle("Q-learning")
     plt.xlabel("Total Timesteps")
     plt.ylabel("Episodes")
     plt.show()
 
     # Runs SARSA with King's Moves
-    #for i in range(500):
     testWorld = World(True)
-    testAgent = Agent(testWorld)
+    testAgent = Agent(0.9, 0.01, testWorld)
     timeSteps = [0]
     episodes = [0]
-    for x in range(170): # i think this is the number of episodes
+    convergedX = []
+    convergedY = []
+    alreadyConverged = False
+    for x in range(170): # the max number of episodes
         result = testAgent.SARSA()
         timeSteps.append(testAgent.numOfSteps)
         episodes.append(x)
-        if(result[0]):
+        if(result[0] and not alreadyConverged):
             print("Found the optimal policy using SARSA, King's Moves, and stochastic winds. The path is...")
             print(result[1])
             print("The actions taken on that path are...")
             print(result[2])
-            # episodeList.append(x+1)
-            # print(result[1])
-            break
+            convergedX.append(x)
+            convergedY.append(testAgent.numOfSteps)
+            alreadyConverged = True
 
-    # print(sum(episodeList) / len(episodeList) )
-
-    plt.plot(timeSteps, episodes)
+    plt.plot(timeSteps, episodes, 'r--', convergedY, convergedX, 'bs')
     plt.suptitle("SARSA - King's Moves")
     plt.xlabel("Total Timesteps")
     plt.ylabel("Episodes")
     plt.show()
 
     # Runs Q-learning with King's Moves
-    #for i in range(500):
     testWorld = World(True)
-    testAgent = Agent(testWorld)
+    testAgent = Agent(0.9, 0.01, testWorld)
     timeSteps = [0]
     episodes = [0]
-    for x in range(1700): # i think this is the number of episodes
+    convergedX = []
+    convergedY = []
+    alreadyConverged = False
+    for x in range(170): # the max number of episodes
         result = testAgent.Qlearning()
         timeSteps.append(testAgent.numOfSteps)
         episodes.append(x)
-        if(result[0]):
+        if(result[0] and not alreadyConverged):
             print("Found the optimal policy using Q-learning, King's Moves, and stochastic winds. The path is...")
             print(result[1])
             print("The actions taken on that path are...")
             print(result[2])
-            # episodeList.append(x+1)
-            # print(result[1])
-            break
-    # print(sum(episodeList) / len(episodeList) )
+            convergedX.append(x)
+            convergedY.append(testAgent.numOfSteps)
+            alreadyConverged = True
 
-    plt.plot(timeSteps, episodes)
+    plt.plot(timeSteps, episodes, 'r--', convergedY, convergedX, 'bs')
     plt.suptitle("Q-learning - King's Moves")
     plt.xlabel("Total Timesteps")
     plt.ylabel("Episodes")
