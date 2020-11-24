@@ -220,7 +220,6 @@ class Agent:
         return converged, visited, actionsTaken
 
 def main():
-    episodeList = []
     # Runs regular SARSA
     testWorld = World(False)
     testAgent = Agent(0.9, 0.001, testWorld)
