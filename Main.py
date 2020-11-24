@@ -128,6 +128,7 @@ class Agent:
         action = None # initializing the return
 
         randomNum = np.random.rand()
+        # this is the epsilon-greedy policy:
         if(randomNum < self.epsilon):
             subOptimalActionChoiceIndex = random.randint(0, len(allowedActions) - 1)
             action = allowedActions[subOptimalActionChoiceIndex]
@@ -168,8 +169,6 @@ class Agent:
             # Update the Q-value of the current position
             self.Q_values[self.world.currentPos][chosenAction] += self.alpha * (reward + self.gamma * self.Q_values[newPosition][nextAction] - self.Q_values[self.world.currentPos][chosenAction]) # perform the update
 
-            #print(round(oldQ, 4))
-            #print(round(self.Q_values[self.world.currentPos][chosenAction], 4))
             if(abs(oldQ - self.Q_values[self.world.currentPos][chosenAction]) > self.epsilon):
                 converged = False
 
